@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aaronjencks/gitchbot/storage"
+
 	twitch "github.com/gempir/go-twitch-irc/v4"
 )
 
@@ -12,22 +14,39 @@ type Bot interface {
 	Depart(channel string) error
 	Say(channel, message string) error
 	Whisper(channel, user, message string) error
+	Storage() storage.StorageBacking
+	RegisterHandler(name string, handler CommandHandler)
+	UnregisterHandler(name string)
 	Loop()
 }
 
 type BasicTwitchBot struct {
 	username string
 	client   *twitch.Client
-	Handlers map[string]CommandHandler
+	handlers map[string]CommandHandler
+	storage  storage.StorageBacking
 }
 
-func CreateBasicTwitchBot(username, oauth string) *BasicTwitchBot {
+func CreateBasicTwitchBot(username, oauth string, backer storage.StorageBacking) *BasicTwitchBot {
 	result := BasicTwitchBot{
 		username: username,
 		client:   twitch.NewClient(username, oauth),
-		Handlers: map[string]CommandHandler{},
+		handlers: map[string]CommandHandler{},
+		storage:  backer,
 	}
 	return &result
+}
+
+func (bb *BasicTwitchBot) Storage() storage.StorageBacking {
+	return bb.storage
+}
+
+func (bb *BasicTwitchBot) RegisterHandler(name string, handler CommandHandler) {
+	bb.handlers[name] = handler
+}
+
+func (bb *BasicTwitchBot) UnregisterHandler(name string) {
+	delete(bb.handlers, name)
 }
 
 func (bb *BasicTwitchBot) Join(channel string) error {
@@ -59,7 +78,7 @@ func (bb *BasicTwitchBot) Loop() {
 				log.Printf("failed to parse command message: %v\n", err)
 				return
 			}
-			handler, ok := bb.Handlers[cmd.Command]
+			handler, ok := bb.handlers[cmd.Command]
 			if !ok {
 				log.Printf("no handler found for command \"%s\"\n", cmd.Command)
 				return

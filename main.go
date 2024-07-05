@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/aaronjencks/gitchbot/storage"
 	"github.com/oriser/regroup"
 )
 
@@ -27,12 +28,14 @@ var (
 	irc_addr    string = "irc.chat.twitch.tv:6667"
 	credentials string = "./config.json"
 	channel     string = "cheezitthehedgehog"
+	backing     string = "./data.db"
 )
 
 func main() {
 	flag.StringVar(&irc_addr, "address", irc_addr, "the address to use for twitch connection")
 	flag.StringVar(&credentials, "credentials", credentials, "the location of the credentials json file")
 	flag.StringVar(&channel, "channel", channel, "the channel for the bot to join")
+	flag.StringVar(&backing, "db", backing, "the location of the sql database for data backing")
 	flag.Parse()
 
 	fp, err := os.Open(credentials)
@@ -48,7 +51,13 @@ func main() {
 		panic(err)
 	}
 
-	bot := CreateBasicTwitchBot(account.Username, account.Token)
+	sqlBacking, err := storage.CreateSqliteBacker(backing)
+	if err != nil {
+		panic(err)
+	}
+
+	bot := CreateBasicTwitchBot(account.Username, account.Token, sqlBacking)
+	CreateCounterHandler(bot, "oops", 0, "Whoopsie, I made a mistake")
 	bot.Join(channel)
 	bot.Loop()
 }
