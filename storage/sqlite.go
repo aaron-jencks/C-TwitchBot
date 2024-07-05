@@ -3,7 +3,7 @@ package storage
 import (
 	"database/sql"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type SqliteBackingStore struct {
@@ -11,7 +11,7 @@ type SqliteBackingStore struct {
 }
 
 func (sb SqliteBackingStore) setupTables() error {
-	db, err := sql.Open("sqlite3", sb.fname)
+	db, err := sql.Open("sqlite", sb.fname)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func CreateSqliteBacker(fname string) (*SqliteBackingStore, error) {
 }
 
 func (sb *SqliteBackingStore) CreateCounter(name string, initial int, prefix string) error {
-	db, err := sql.Open("sqlite3", sb.fname)
+	db, err := sql.Open("sqlite", sb.fname)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (sb *SqliteBackingStore) CreateCounter(name string, initial int, prefix str
 }
 
 func (sb *SqliteBackingStore) RetrieveCounter(name string) (value int, err error) {
-	db, err := sql.Open("sqlite3", sb.fname)
+	db, err := sql.Open("sqlite", sb.fname)
 	if err != nil {
 		return
 	}
@@ -57,7 +57,7 @@ func (sb *SqliteBackingStore) RetrieveCounter(name string) (value int, err error
 }
 
 func (sb *SqliteBackingStore) UpdateCounter(name string, newValue int) error {
-	db, err := sql.Open("sqlite3", sb.fname)
+	db, err := sql.Open("sqlite", sb.fname)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (sb *SqliteBackingStore) UpdateCounter(name string, newValue int) error {
 }
 
 func (sb *SqliteBackingStore) DeleteCounter(name string) error {
-	db, err := sql.Open("sqlite3", sb.fname)
+	db, err := sql.Open("sqlite", sb.fname)
 	if err != nil {
 		return err
 	}
