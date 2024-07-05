@@ -53,6 +53,26 @@ func (bb *BasicTwitchBot) Whisper(channel, user, message string) error {
 func (bb *BasicTwitchBot) Loop() {
 	bb.client.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		log.Printf("%s: %s\n", message.User.DisplayName, message.Message)
+		if ContainsCommand(message.Message) {
+			cmd, err := ParseCommand(message.Message)
+			if err != nil {
+				log.Printf("failed to parse command message: %v\n", err)
+				return
+			}
+			handler, ok := bb.Handlers[cmd.Command]
+			if !ok {
+				log.Printf("no handler found for command \"%s\"\n", cmd.Command)
+				return
+			}
+			err = handler(bb, ReducedMessage{
+				User:    message.User,
+				Channel: message.Channel,
+				Message: message.Message,
+			}, cmd)
+			if err != nil {
+				log.Printf("failed to handle command \"%s\" with params: \"%s\": %v\n", cmd.Command, cmd.Args, err)
+			}
+		}
 	})
 
 	log.Printf("Bot %s started...\n", bb.username)
