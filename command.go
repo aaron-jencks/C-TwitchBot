@@ -10,7 +10,7 @@ type Command struct {
 	Args    string
 }
 
-var CMD_REGEX = regroup.MustCompile(`!(?P<command>\w+)\s+(?P<args>.+)`)
+var CMD_REGEX = regroup.MustCompile(`!(?P<command>\w+)(\s+(?P<args>.+))?`)
 
 func ContainsCommand(line string) bool {
 	_, err := CMD_REGEX.Groups(line)
