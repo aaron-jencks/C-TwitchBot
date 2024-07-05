@@ -1,23 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+	"strings"
 )
 
-const AUTH_URL = "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=%s&redirect_uri=https://twitchapps.com/tmi/&scope=chat:read+chat:edit+channel:moderate+whispers:read+whispers:edit+channel_editor"
+type AccessToken struct {
+	AccessToken string `json:"access_token"`
+	Expiration  int    `json:"expires_in"`
+	Type        string `json:"token_type"`
+}
 
-func GetOauthToken(client string) (string, error) {
-	resp, err := http.Get(fmt.Sprintf(AUTH_URL, client))
+func GetAccessToken(cid, csec string) (tok AccessToken, err error) {
+	sbody := fmt.Sprintf("client_id=%s&client_secret=%s&grant_type=client_credentials", cid, csec)
+	resp, err := http.Post("https://id.twitch.tv/oauth2/token", "application/x-www-form-urlencoded", strings.NewReader(sbody))
 	if err != nil {
-		return "", err
+		return
 	}
 	defer resp.Body.Close()
-	bytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	fmt.Println(string(bytes))
-	return "", nil
+	err = json.NewDecoder(resp.Body).Decode(&tok)
+	return
 }

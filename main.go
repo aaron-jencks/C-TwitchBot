@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/textproto"
 	"os"
+
 	"github.com/oriser/regroup"
 )
 
@@ -76,7 +77,7 @@ func (bb *BasicBot) Disconnect() {
 }
 
 func (bb *BasicBot) Pong() error {
-	_, err := fmt.Fprintln(bb.conn, "PONG :tmi.twitch.tv\r\n")
+	_, err := fmt.Fprint(bb.conn, "PONG :tmi.twitch.tv\r\n")
 	return err
 }
 
@@ -118,7 +119,7 @@ func (bb *BasicBot) LeaveChannel(chl string) error {
 		return fmt.Errorf("bot not in channel %s", chl)
 	}
 	_, err := fmt.Fprintf(bb.conn, "PART #%s\r\n", bb.channels[ci])
-	bb.channels = append(bb.channels[:ci], bb.channels[ci + 1:]...)
+	bb.channels = append(bb.channels[:ci], bb.channels[ci+1:]...)
 	log.Printf("Bot left chanel %s\n", bb.channels[ci])
 	return err
 }
@@ -205,7 +206,7 @@ func RunBotLoop(b Bot, addr, username, password string, channels []string) {
 			continue
 		}
 		log.Printf("Message: %s@%s '%s'\n", u, c, m)
-		
+
 	}
 }
 
@@ -215,9 +216,9 @@ type Credentials struct {
 }
 
 var (
-	irc_addr string = "irc.chat.twitch.tv:6667"
+	irc_addr    string = "irc.chat.twitch.tv:6667"
 	credentials string = "./config.json"
-	channel string = "cheezitthehedgehog"
+	channel     string = "cheezitthehedgehog"
 )
 
 func main() {
@@ -239,9 +240,10 @@ func main() {
 		panic(err)
 	}
 
-	// RunBotLoop(&BasicBot{}, irc_addr, account.Username, account.Password, []string{channel})
-	_, err = GetOauthToken(account.Password)
+	tok, err := GetAccessToken(account.Username, account.Password)
 	if err != nil {
 		panic(err)
 	}
+
+	RunBotLoop(&BasicBot{}, irc_addr, account.Username, fmt.Sprintf("oauth:%s", tok.AccessToken), []string{channel})
 }
