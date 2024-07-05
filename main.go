@@ -239,5 +239,9 @@ func main() {
 		panic(err)
 	}
 
-	RunBotLoop(&BasicBot{}, irc_addr, account.Username, account.Password, []string{channel})
+	// RunBotLoop(&BasicBot{}, irc_addr, account.Username, account.Password, []string{channel})
+	_, err = GetOauthToken(account.Password)
+	if err != nil {
+		panic(err)
+	}
 }
