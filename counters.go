@@ -14,7 +14,7 @@ func generateCounterHandler(name string) CommandHandler {
 		if err != nil {
 			return err
 		}
-		return client.Say(msg.Channel, fmt.Sprintf("%s: %d\n", prefix, current))
+		return client.Say(fmt.Sprintf("%s: %d\n", prefix, current))
 	}
 }
 

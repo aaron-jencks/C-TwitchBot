@@ -10,10 +10,11 @@ import (
 )
 
 type Bot interface {
+	Channel() string
 	Join(channel string) error
 	Depart(channel string) error
-	Say(channel, message string) error
-	Whisper(channel, user, message string) error
+	Say(message string) error
+	Whisper(user, message string) error
 	Storage() storage.StorageBacking
 	RegisterHandler(name string, handler CommandHandler)
 	UnregisterHandler(name string)
@@ -22,6 +23,7 @@ type Bot interface {
 
 type BasicTwitchBot struct {
 	username string
+	channel  string
 	client   *twitch.Client
 	handlers map[string]CommandHandler
 	storage  storage.StorageBacking
@@ -35,6 +37,10 @@ func CreateBasicTwitchBot(username, oauth string, backer storage.StorageBacking)
 		storage:  backer,
 	}
 	return &result
+}
+
+func (bb *BasicTwitchBot) Channel() string {
+	return bb.channel
 }
 
 func (bb *BasicTwitchBot) Storage() storage.StorageBacking {
@@ -51,21 +57,23 @@ func (bb *BasicTwitchBot) UnregisterHandler(name string) {
 
 func (bb *BasicTwitchBot) Join(channel string) error {
 	bb.client.Join(channel)
+	bb.channel = channel
 	return nil
 }
 
 func (bb *BasicTwitchBot) Depart(channel string) error {
 	bb.client.Depart(channel)
+	bb.channel = ""
 	return nil
 }
 
-func (bb *BasicTwitchBot) Say(channel, message string) error {
-	bb.client.Say(channel, message)
+func (bb *BasicTwitchBot) Say(message string) error {
+	bb.client.Say(bb.channel, message)
 	return nil
 }
 
-func (bb *BasicTwitchBot) Whisper(channel, user, message string) error {
-	bb.client.Say(channel, fmt.Sprintf("/w %s %s", user, message))
+func (bb *BasicTwitchBot) Whisper(user, message string) error {
+	bb.client.Say(bb.channel, fmt.Sprintf("/w %s %s", user, message))
 	return nil
 }
 
