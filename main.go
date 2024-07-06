@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aaronjencks/gitchbot/storage"
+	"github.com/aaron-jencks/gitchbot/storage"
 	"github.com/oriser/regroup"
 )
 

@@ -1,4 +1,4 @@
-module github.com/aaronjencks/gitchbot
+module github.com/aaron-jencks/gitchbot
 
 go 1.18
 

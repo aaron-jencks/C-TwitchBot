@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/aaronjencks/gitchbot/storage"
+	"github.com/aaron-jencks/gitchbot/storage"
 
 	twitch "github.com/gempir/go-twitch-irc/v4"
 )
