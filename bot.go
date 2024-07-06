@@ -18,6 +18,7 @@ type Bot interface {
 	Whisper(user, message string) error
 	Storage() storage.StorageBacking
 	RegisterHandler(name string, handler CommandHandler)
+	HandlerExists(name string) bool
 	UnregisterHandler(name string)
 	Loop()
 }
@@ -46,6 +47,11 @@ func (bb *BasicTwitchBot) Channel() string {
 
 func (bb *BasicTwitchBot) Storage() storage.StorageBacking {
 	return bb.storage
+}
+
+func (bb *BasicTwitchBot) HandlerExists(name string) bool {
+	_, ok := bb.handlers[name]
+	return ok
 }
 
 func (bb *BasicTwitchBot) RegisterHandler(name string, handler CommandHandler) {

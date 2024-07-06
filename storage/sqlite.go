@@ -2,9 +2,7 @@ package storage
 
 import (
 	"database/sql"
-	"time"
-
-	_ "modernc.org/sqlite"
+	"time" 
 )
 
 type SqliteBackingStore struct {
@@ -12,7 +10,7 @@ type SqliteBackingStore struct {
 }
 
 func (sb SqliteBackingStore) setupTables() error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -25,8 +23,17 @@ func (sb SqliteBackingStore) setupTables() error {
 	if err != nil {
 		return err
 	}
+	_, err = db.Exec("create table if not exists mappings (name text primary key, message text)")
+	if err != nil {
+		return err
+	}
 	return nil
 }
+
+func (sb *SqliteBackingStore) GetDbConn() (*sql.DB, error) {
+	return getSqliteConn(sb.fname)
+}
+
 
 func CreateSqliteBacker(fname string) (*SqliteBackingStore, error) {
 	result := SqliteBackingStore{
@@ -37,7 +44,7 @@ func CreateSqliteBacker(fname string) (*SqliteBackingStore, error) {
 }
 
 func (sb *SqliteBackingStore) CreateCounter(name string, initial int, prefix string) error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -47,7 +54,7 @@ func (sb *SqliteBackingStore) CreateCounter(name string, initial int, prefix str
 }
 
 func (sb *SqliteBackingStore) RetrieveCounter(name string) (value int, prefix string, err error) {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return
 	}
@@ -62,7 +69,7 @@ func (sb *SqliteBackingStore) RetrieveCounter(name string) (value int, prefix st
 }
 
 func (sb *SqliteBackingStore) UpdateCounter(name string, newValue int) error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -72,7 +79,7 @@ func (sb *SqliteBackingStore) UpdateCounter(name string, newValue int) error {
 }
 
 func (sb *SqliteBackingStore) DeleteCounter(name string) error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -82,7 +89,7 @@ func (sb *SqliteBackingStore) DeleteCounter(name string) error {
 }
 
 func (sb *SqliteBackingStore) ListCounters() ([]string, error) {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +113,7 @@ func (sb *SqliteBackingStore) ListCounters() ([]string, error) {
 }
 
 func (sb *SqliteBackingStore) CreateTimer(name string, message string, interval time.Duration) error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -117,7 +124,7 @@ func (sb *SqliteBackingStore) CreateTimer(name string, message string, interval 
 }
 
 func (sb *SqliteBackingStore) RetrieveTimer(name string) (message string, interval time.Duration, next time.Time, err error) {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return
 	}
@@ -144,7 +151,7 @@ func (sb *SqliteBackingStore) ResetTimer(name string) error {
 		return err
 	}
 
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -155,7 +162,7 @@ func (sb *SqliteBackingStore) ResetTimer(name string) error {
 }
 
 func (sb *SqliteBackingStore) DeleteTimer(name string) error {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return err
 	}
@@ -165,7 +172,7 @@ func (sb *SqliteBackingStore) DeleteTimer(name string) error {
 }
 
 func (sb *SqliteBackingStore) ListTimers() (map[string]time.Time, error) {
-	db, err := sql.Open("sqlite", sb.fname)
+	db, err := getSqliteConn(sb.fname)
 	if err != nil {
 		return nil, err
 	}
@@ -190,4 +197,73 @@ func (sb *SqliteBackingStore) ListTimers() (map[string]time.Time, error) {
 	}
 	err = rows.Err()
 	return result, err
+}
+
+func (sb *SqliteBackingStore) CreateMapping(name, message string) error {
+	db, err := getSqliteConn(sb.fname)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	_, err = db.Exec("insert or ignore into mappings values (?, ?)", name, message)
+	return err
+}
+
+func (sb *SqliteBackingStore) RetrieveMapping(name string) (msg string, err error) {
+	db, err := getSqliteConn(sb.fname)
+	if err != nil {
+		return
+	}
+	defer db.Close()
+	row := db.QueryRow("select message from mappings where name = ?", name)
+	err = row.Err()
+	if err != nil {
+		return
+	}
+	err = row.Scan(&msg)
+	return
+}
+
+func (sb *SqliteBackingStore) UpdateMapping(name, newMessage string) error {
+	db, err := getSqliteConn(sb.fname)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	_, err = db.Exec("update or replace mappings set message = ? where name = ?", newMessage, name)
+	return err
+}
+
+func (sb *SqliteBackingStore) DeleteMapping(name string) error {
+	db, err := getSqliteConn(sb.fname)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	_, err = db.Exec("delete from mappings where name = ?", name)
+	return err
+}
+
+func (sb *SqliteBackingStore) ListMappings() (result map[string]string, err error) {
+	db, err := getSqliteConn(sb.fname)
+	if err != nil {
+		return
+	}
+	defer db.Close()
+	rows, err := db.Query("select * from mappings order by name")
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	result = map[string]string{}
+	var tname, tmsg string
+	for rows.Next() {
+		err = rows.Scan(&tname, &tmsg)
+		if err != nil {
+			return
+		}
+		result[tname] = tmsg
+	}
+	err = rows.Err()
+	return
 }
