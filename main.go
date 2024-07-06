@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"os"
+	"time"
 
 	"github.com/aaronjencks/gitchbot/storage"
 	"github.com/oriser/regroup"
@@ -64,8 +65,8 @@ func main() {
 		panic(err)
 	}
 
-	CreateCounterHandler(bot, "oops", 0, "Whoopsie, I made a mistake")
 	CreateMappingHandler(bot, "discord", "I have a discord where you can ask questions any time! https://discord.gg/8M5bvJWa4b")
+	CreateTimer(bot, "discord", "Oh hey, there's a discord: https://discord.gg/8M5bvJWa4b", 15*time.Minute)
 	CreateProgrammingHelpQueue(bot)
 
 	bot.Join(channel)
