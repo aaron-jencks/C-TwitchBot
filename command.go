@@ -33,4 +33,10 @@ type ReducedMessage struct {
 	Message string
 }
 
+func (rm ReducedMessage) IsModerator() bool {
+	_, broad := rm.User.Badges["broadcaster"]
+	_, mod := rm.User.Badges["moderator"]
+	return broad || mod
+}
+
 type CommandHandler func(client Bot, msg ReducedMessage, command Command) error
