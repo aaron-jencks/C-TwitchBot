@@ -18,8 +18,8 @@ const MAX_MSG_LEN = 512
 var CmdRegex *regroup.ReGroup = regroup.MustCompile(`^!(\w+)\s?(\w+)?`)
 
 type Credentials struct {
-	Username     string `json:"username"`
-	Token        string `json:"oauth_token"`
+	Username string `json:"username"`
+	Token    string `json:"oauth_token"`
 }
 
 var (
@@ -66,7 +66,8 @@ func main() {
 
 	CreateCounterHandler(bot, "oops", 0, "Whoopsie, I made a mistake")
 	CreateMappingHandler(bot, "discord", "I have a discord where you can ask questions any time! https://discord.gg/8M5bvJWa4b")
-	
+	CreateProgrammingHelpQueue(bot)
+
 	bot.Join(channel)
 	bot.Loop()
 }
