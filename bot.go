@@ -87,6 +87,11 @@ func (bb *BasicTwitchBot) Whisper(user, message string) error {
 func (bb *BasicTwitchBot) Loop() {
 	bb.client.OnPrivateMessage(func(message twitch.PrivateMessage) {
 		log.Printf("%s: %s\n", message.User.DisplayName, message.Message)
+
+		if message.User.DisplayName != bb.username {
+			TimerMarkMessageReceived() // this helps avoid spam
+		}
+
 		if ContainsCommand(message.Message) {
 			cmd, err := ParseCommand(message.Message)
 			if err != nil {
