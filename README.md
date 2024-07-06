@@ -1,2 +1,2 @@
-# C-TwitchBot
-A twitch bot written in C
+# Gitchbot
+A twitch bot written in Go
