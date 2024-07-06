@@ -23,6 +23,14 @@ func HandleTimers(b Bot) error {
 		if err != nil {
 			return err
 		}
-		b.Say()
+		err = b.Say(msg)
+		if err != nil {
+			return err
+		}
+		err = backer.ResetTimer(name)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

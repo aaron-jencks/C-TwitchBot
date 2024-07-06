@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aaronjencks/gitchbot/storage"
 
@@ -101,6 +102,18 @@ func (bb *BasicTwitchBot) Loop() {
 			}
 		}
 	})
+
+	go func() {
+		timer := time.NewTicker(time.Second)
+		for {
+			<-timer.C
+			err := HandleTimers(bb)
+			if err != nil {
+				log.Printf("failed to handle timers: %v\n", err)
+				continue
+			}
+		}
+	}()
 
 	log.Printf("Bot %s started...\n", bb.username)
 	err := bb.client.Connect()
