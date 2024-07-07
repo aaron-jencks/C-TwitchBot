@@ -66,9 +66,12 @@ func main() {
 	}
 
 	CreateMappingHandler(bot, "discord", "I have a discord where you can ask questions any time! https://discord.gg/8M5bvJWa4b")
+	CreateMappingHandler(bot, "lurk", "@{user} disappears into the shadows, they will return...")
 	CreateTimer(bot, "discord", "Oh hey, there's a discord: https://discord.gg/8M5bvJWa4b", 15*time.Minute)
+	CreateTimer(bot, "lurkers", "Wanna say thank you to all my lurkers, love you <3", 20*time.Minute)
 	CreateProgrammingHelpQueue(bot)
 
 	bot.Join(channel)
+	bot.Say("Beep Boop, bot is online!")
 	bot.Loop()
 }

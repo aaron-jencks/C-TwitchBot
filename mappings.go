@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 )
 
 func generateMappingHandler(name string) CommandHandler {
@@ -12,6 +13,7 @@ func generateMappingHandler(name string) CommandHandler {
 		if err != nil {
 			return err
 		}
+		mout = strings.ReplaceAll(mout, "{user}", msg.User.DisplayName)
 		return client.Say(mout)
 	}
 }
