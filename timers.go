@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log"
 	"sync"
 	"time"
 )
 
 func CreateTimer(b Bot, name, message string, interval time.Duration) error {
+	log.Printf("created timer for %s\n", name)
 	return b.Storage().CreateTimer(name, message, interval)
 }
 

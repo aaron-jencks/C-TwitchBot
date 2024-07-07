@@ -98,5 +98,5 @@ func CreateProgrammingHelpQueue(b Bot) error {
 		}
 		return nil
 	})
-	return CreateTimer(b, "help_timer", "Want to ask a question? Now you can use the queue! See \"!help about\" for usage", 5*time.Minute)
+	return CreateTimer(b, "help_timer", "Want to ask a question? Now you can use the queue! See \"!help about\" for usage", 1*time.Minute)
 }

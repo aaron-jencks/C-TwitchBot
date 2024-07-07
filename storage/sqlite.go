@@ -2,7 +2,8 @@ package storage
 
 import (
 	"database/sql"
-	"time" 
+	"fmt"
+	"time"
 )
 
 type SqliteBackingStore struct {
@@ -33,7 +34,6 @@ func (sb SqliteBackingStore) setupTables() error {
 func (sb *SqliteBackingStore) GetDbConn() (*sql.DB, error) {
 	return getSqliteConn(sb.fname)
 }
-
 
 func CreateSqliteBacker(fname string) (*SqliteBackingStore, error) {
 	result := SqliteBackingStore{
@@ -157,8 +157,18 @@ func (sb *SqliteBackingStore) ResetTimer(name string) error {
 	}
 	defer db.Close()
 	next := time.Now().Add(intr).Format(time.RFC3339)
-	_, err = db.Exec("update or replace timers set next = ? where name = ?", name, next)
-	return err
+	res, err := db.Exec("update or replace timers set next = ? where name = ?", next, name)
+	if err != nil {
+		return err
+	}
+	cnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if cnt == 0 {
+		return fmt.Errorf("timer reset did not change any rows")
+	}
+	return nil
 }
 
 func (sb *SqliteBackingStore) DeleteTimer(name string) error {
